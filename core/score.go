@@ -9,7 +9,7 @@ import (
 )
 
 const scoreFile = util.PathScore + "score_file.json"
-const defaultScore = 500 //默认分数500
+const defaultScore = 1 //默认分数500
 
 type scoreTyp = map[int]int32
 
