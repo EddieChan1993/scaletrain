@@ -14,6 +14,8 @@ const defaultScore = 1 //默认分数500
 type scoreTyp = map[int]int32
 
 var scores scoreTyp
+var totalScale int64 //总共答题
+var sureScale int64  //答对
 
 func InitScore() {
 	scores = reloadScore()
@@ -41,6 +43,12 @@ func randIndexByScore() int {
 
 func AddScore(id int) {
 	scores[id] += 1
+	totalScale += 1
+	sureScale += 1
+}
+
+func LogTotalScale() {
+	totalScale += 1
 }
 
 //saveScore 存储分数
@@ -62,4 +70,9 @@ func reloadScore() scoreTyp {
 	data := util.ReadFile(scoreFile)
 	json.Unmarshal(data, &scores)
 	return scores
+}
+
+func showEnd() {
+	fmt.Println("=======================")
+	fmt.Println("总共答题", totalScale, "；答对", sureScale)
 }

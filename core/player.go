@@ -11,7 +11,8 @@ import (
 )
 
 const statusStop = 1
-const waitSec = 2
+const waitSec = 2        //等待时间
+const maxRepeatTimes = 3 //最大重复次数
 
 type Player struct {
 	queue    *queue
@@ -43,7 +44,6 @@ func InitPlayer() *Player {
 func (this_ *Player) RunPlayer() {
 	speaker.Init(this_.sr, this_.sr.N(time.Second/10))
 	speaker.Play(this_.queue)
-	flag := ""
 	fmt.Println("===========开始准备============")
 	time.Sleep(waitSec * time.Second)
 	this_.randPlay()
@@ -52,31 +52,44 @@ func (this_ *Player) RunPlayer() {
 			this_.stop <- struct{}{}
 			fmt.Println("stop 播放器")
 		}()
+		repeatTimes := 0
+		flag := ""
 		for {
 			select {
 			case <-this_.ctx.Done():
 				return
 			case s := <-this_.nowSound:
-				fmt.Println(waitSec, "秒后公布")
-				time.Sleep(2 * time.Second)
-				fmt.Println(s.tag, "正确(v) ?")
-				fmt.Scanf("%s\n", &flag)
-				if this_.status == statusStop {
-					return
-				}
-				if flag == "v" {
-					//对，加分
-					AddScore(s.id)
-					flag = ""
-
-					fmt.Println("=======================")
-					s.resetSound()
-					this_.randPlay()
+				s.resetSound()
+				if repeatTimes == 0 {
+					fmt.Println(waitSec, "秒后公布")
+					time.Sleep(2 * time.Second)
+					fmt.Println(s.tag, "正确(v) ?")
+					fmt.Scanf("%s\n", &flag)
+					if flag == "v" {
+						//对，加分
+						AddScore(s.id)
+						flag = ""
+						this_.randPlay()
+					} else {
+						//错了，则重复播放
+						fmt.Println(s.tag, "反复听", maxRepeatTimes, "遍")
+						this_.repeatPlay(s.id)
+						repeatTimes++
+						LogTotalScale()
+						break
+					}
 				} else {
+					time.Sleep(1 * time.Second)
+					if repeatTimes >= maxRepeatTimes {
+						//重听次数超过，正常随机
+						this_.randPlay()
+						repeatTimes = 0
+						break
+					}
 					//错了，则重复播放
-					s.resetSound()
+					repeatTimes++
+					fmt.Println(s.tag, "第", repeatTimes, "遍")
 					this_.repeatPlay(s.id)
-					break
 				}
 			}
 		}
@@ -85,6 +98,7 @@ func (this_ *Player) RunPlayer() {
 
 //randPlay 随机播放
 func (this_ *Player) randPlay() {
+	fmt.Println("=======================")
 	s := newRandSound()
 	resampled := beep.Resample(4, s.format.SampleRate, this_.sr, s.s)
 	volume := &effects.Volume{
@@ -120,5 +134,5 @@ func (this_ *Player) Stop() {
 	<-this_.stop
 	saveScore()
 	music.CloseMusicFs()
-
+	showEnd()
 }
