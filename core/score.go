@@ -64,7 +64,6 @@ func SubScore(id int) {
 		scores[id] -= 1
 	}
 	totalScale += 1
-	sureScale += 1
 }
 
 //saveScore 存储分数
