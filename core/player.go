@@ -17,6 +17,7 @@ type Player struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
 	ticker   *time.Ticker
+	stop     chan struct{}
 }
 
 func InitPlayer() *Player {
@@ -30,6 +31,7 @@ func InitPlayer() *Player {
 		ctx:      ctx,
 		cancel:   cancel,
 		ticker:   ticker,
+		stop:     make(chan struct{}),
 	}
 }
 
@@ -41,6 +43,7 @@ func (this_ *Player) RunPlayer() {
 			select {
 			case <-this_.ctx.Done():
 				fmt.Println("stop 播放器")
+				this_.stop <- struct{}{}
 				return
 			case s := <-this_.nowSound:
 				fmt.Println(s.tag)
@@ -70,5 +73,5 @@ func (this_ *Player) randPlay() {
 func (this_ *Player) Stop() {
 	this_.cancel()
 	this_.ticker.Stop()
-	<-this_.ctx.Done()
+	<-this_.stop
 }
