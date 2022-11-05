@@ -23,6 +23,7 @@ type Player struct {
 	ticker   *time.Ticker
 	stop     chan struct{}
 	status   int
+	st       music.SoundTyp //音高类型
 }
 
 func InitPlayer() *Player {
@@ -30,7 +31,8 @@ func InitPlayer() *Player {
 	InitScore()
 	ctx, cancel := context.WithCancel(context.Background())
 	ticker := time.NewTicker(4 * time.Second)
-	return &Player{
+
+	player := &Player{
 		queue:    &queue{},
 		nowSound: make(chan *sound),
 		sr:       beep.SampleRate(44100),
@@ -39,12 +41,30 @@ func InitPlayer() *Player {
 		ticker:   ticker,
 		stop:     make(chan struct{}),
 	}
+	player.selectScaleST()
+	return player
+}
+
+//selectScaleST 音区选择
+func (this_ *Player) selectScaleST() {
+	stFlg := 0
+	fmt.Println("===========选择练习音区============")
+	fmt.Println("1高音区  2中音区 3低音区（其他）全部")
+	fmt.Scanf("%d", &stFlg)
+	switch stFlg {
+	case 1:
+		this_.st = music.HighSound
+	case 2:
+		this_.st = music.MidSound
+	case 3:
+		this_.st = music.LowSound
+	}
 }
 
 func (this_ *Player) RunPlayer() {
 	speaker.Init(this_.sr, this_.sr.N(time.Second/10))
 	speaker.Play(this_.queue)
-	fmt.Println("===========开始准备============")
+	fmt.Println("===========开始准备", this_.st, "============")
 	time.Sleep(waitSec * time.Second)
 	this_.randPlay()
 	go func() {
@@ -70,6 +90,7 @@ func (this_ *Player) RunPlayer() {
 						//对，加分
 						AddScore(s.id)
 						this_.randPlay()
+						fmt.Println("=======================")
 					} else {
 						//错了，则重复播放
 						fmt.Println(s.tag, "反复听", maxRepeatTimes, "遍")
@@ -84,6 +105,7 @@ func (this_ *Player) RunPlayer() {
 						//重听次数超过，正常随机
 						this_.randPlay()
 						repeatTimes = 0
+						fmt.Println("=======================")
 						break
 					}
 					//错了，则重复播放
@@ -98,8 +120,7 @@ func (this_ *Player) RunPlayer() {
 
 //randPlay 随机播放
 func (this_ *Player) randPlay() {
-	fmt.Println("=======================")
-	s := newRandSound()
+	s := newRandSound(this_.st)
 	resampled := beep.Resample(4, s.format.SampleRate, this_.sr, s.s)
 	volume := &effects.Volume{
 		Streamer: resampled,

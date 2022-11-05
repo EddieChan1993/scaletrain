@@ -29,14 +29,26 @@ func InitScore() {
 }
 
 //randIndexByScore 根据评分随机出一个index
-func randIndexByScore() int {
+func randIndexByScore(st music.SoundTyp) int {
 	poolTyp := make(util.RandPoolTyp)
 	total := util.DefaultInt(0)
-	for _, s := range scores {
-		total += s
+	for id, s := range scores {
+		if st == "" {
+			total += s
+		} else {
+			if music.MusicsFs[id].SoundType == st {
+				total += s
+			}
+		}
 	}
 	for id, weight := range scores {
-		poolTyp[util.DefaultInt(id)] = total - weight
+		if st == "" {
+			poolTyp[util.DefaultInt(id)] = total - weight
+		} else {
+			if music.MusicsFs[id].SoundType == st {
+				poolTyp[util.DefaultInt(id)] = total - weight
+			}
+		}
 	}
 	return int(util.RandOne(poolTyp))
 }

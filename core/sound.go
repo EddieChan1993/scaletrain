@@ -18,8 +18,8 @@ type sound struct {
 }
 
 //newRandSound 随机获取一歌曲文件
-func newRandSound() *sound {
-	musicFsIndex := randIndexByScore()
+func newRandSound(st music.SoundTyp) *sound {
+	musicFsIndex := randIndexByScore(st)
 	musicsFsOne := music.MusicsFs[musicFsIndex]
 	streamer, format, err := mp3.Decode(musicsFsOne.Fs)
 	if err != nil {
