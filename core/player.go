@@ -22,7 +22,7 @@ type Player struct {
 func InitPlayer() *Player {
 	music.ReloadSoundFiles()
 	ctx, cancel := context.WithCancel(context.Background())
-	ticker := time.NewTicker(3 * time.Second)
+	ticker := time.NewTicker(4 * time.Second)
 	return &Player{
 		queue:    &queue{},
 		nowSound: make(chan *sound),

@@ -2,6 +2,7 @@ package music
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -39,6 +40,7 @@ func ReloadSoundFiles() {
 			Tag: after,
 		})
 	}
+	fmt.Println("音频文件加载完成")
 }
 
 //CloseMusicFs 关闭所有音乐文件
@@ -46,4 +48,6 @@ func CloseMusicFs() {
 	for _, f := range MusicsFs {
 		f.Fs.Close()
 	}
+	fmt.Println("音频文件释放完成")
+
 }
