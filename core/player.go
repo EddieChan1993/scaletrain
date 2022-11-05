@@ -11,6 +11,7 @@ import (
 )
 
 const statusStop = 1
+const waitSec = 2
 
 type Player struct {
 	queue    *queue
@@ -44,7 +45,7 @@ func (this_ *Player) RunPlayer() {
 	speaker.Play(this_.queue)
 	flag := ""
 	fmt.Println("===========开始准备============")
-	time.Sleep(2 * time.Second)
+	time.Sleep(waitSec * time.Second)
 	this_.randPlay()
 	go func() {
 		defer func() {
@@ -56,24 +57,27 @@ func (this_ *Player) RunPlayer() {
 			case <-this_.ctx.Done():
 				return
 			case s := <-this_.nowSound:
-				if this_.status == statusStop {
-					return
-				}
+				fmt.Println(waitSec, "秒后公布")
 				time.Sleep(2 * time.Second)
 				fmt.Println(s.tag, "正确(v) ?")
 				fmt.Scanf("%s\n", &flag)
+				if this_.status == statusStop {
+					return
+				}
 				if flag == "v" {
+					//对，加分
 					AddScore(s.id)
 					flag = ""
+
+					fmt.Println("=======================")
+					s.resetSound()
+					this_.randPlay()
 				} else {
-					//打错了，则重复播放
+					//错了，则重复播放
 					s.resetSound()
 					this_.repeatPlay(s.id)
 					break
 				}
-				fmt.Println("=======================")
-				s.resetSound()
-				this_.randPlay()
 			}
 		}
 	}()
@@ -115,4 +119,6 @@ func (this_ *Player) Stop() {
 	this_.status = statusStop
 	<-this_.stop
 	saveScore()
+	music.CloseMusicFs()
+
 }
