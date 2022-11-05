@@ -34,6 +34,20 @@ func newRandSound() *sound {
 	}
 }
 
+func newSound(id int) *sound {
+	musicsFsOne := music.MusicsFs[id]
+	streamer, format, err := mp3.Decode(musicsFsOne.Fs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return &sound{
+		id:     musicsFsOne.Id,
+		fs:     musicsFsOne.Fs,
+		s:      streamer,
+		format: format,
+		tag:    musicsFsOne.Tag,
+	}
+}
 func (this_ *sound) resetSound() {
 	this_.fs.Seek(0, 0)
 }

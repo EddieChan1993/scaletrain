@@ -43,7 +43,7 @@ func (this_ *Player) RunPlayer() {
 	speaker.Init(this_.sr, this_.sr.N(time.Second/10))
 	speaker.Play(this_.queue)
 	flag := ""
-	fmt.Println("=======================")
+	fmt.Println("===========开始准备============")
 	time.Sleep(2 * time.Second)
 	this_.randPlay()
 	go func() {
@@ -56,17 +56,22 @@ func (this_ *Player) RunPlayer() {
 			case <-this_.ctx.Done():
 				return
 			case s := <-this_.nowSound:
-				time.Sleep(3 * time.Second)
-				fmt.Println(s.tag, "正确(v) ?")
-				fmt.Scanf("%s", &flag)
-				if flag == "v" {
-					AddScore(s.id)
-				}
 				if this_.status == statusStop {
 					return
 				}
-				fmt.Println("=======================")
 				time.Sleep(2 * time.Second)
+				fmt.Println(s.tag, "正确(v) ?")
+				fmt.Scanf("%s\n", &flag)
+				if flag == "v" {
+					AddScore(s.id)
+					flag = ""
+				} else {
+					//打错了，则重复播放
+					s.resetSound()
+					this_.repeatPlay(s.id)
+					break
+				}
+				fmt.Println("=======================")
 				s.resetSound()
 				this_.randPlay()
 			}
@@ -77,6 +82,21 @@ func (this_ *Player) RunPlayer() {
 //randPlay 随机播放
 func (this_ *Player) randPlay() {
 	s := newRandSound()
+	resampled := beep.Resample(4, s.format.SampleRate, this_.sr, s.s)
+	volume := &effects.Volume{
+		Streamer: resampled,
+		Base:     2,
+		Volume:   2,
+	}
+	speaker.Lock()
+	this_.queue.Add(volume, beep.Callback(func() {
+		this_.nowSound <- s
+	}))
+	speaker.Unlock()
+}
+
+func (this_ *Player) repeatPlay(id int) {
+	s := newSound(id)
 	resampled := beep.Resample(4, s.format.SampleRate, this_.sr, s.s)
 	volume := &effects.Volume{
 		Streamer: resampled,
