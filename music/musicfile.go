@@ -6,17 +6,20 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"scaletrain/util"
+	"strconv"
 	"strings"
 )
 
 //go:embed mf/*.mp3
 var filesFs embed.FS
 
-var MusicsFs []*TMusicFs
+var MusicsFs = make(map[int]*TMusicFs)
 
 type TMusicFs struct {
 	Fs  *os.File
 	Tag string
+	Id  int
 }
 
 //ReloadSoundFiles  加载所有歌曲文件
@@ -27,18 +30,19 @@ func ReloadSoundFiles() {
 		log.Fatal(err)
 	}
 	//打印出文件名称
-	path := "/Users/eddiechan/go/bin"
 	for _, file := range fslist {
-		f, err := os.Open(path + "/music/mf/" + file.Name())
+		f, err := os.Open(util.Path + file.Name())
 		if err != nil {
 			log.Fatal(err)
 		}
-		_, after, _ := strings.Cut(f.Name(), "-")
+		before, after, _ := strings.Cut(strings.TrimLeft(file.Name(), util.Path), "-")
 		after = strings.TrimRight(after, ".mp3")
-		MusicsFs = append(MusicsFs, &TMusicFs{
+		id, _ := strconv.Atoi(before)
+		MusicsFs[id] = &TMusicFs{
 			Fs:  f,
 			Tag: after,
-		})
+			Id:  id,
+		}
 	}
 	fmt.Println("音频文件加载完成")
 }

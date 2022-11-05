@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const statusStop = 1
+
 type Player struct {
 	queue    *queue
 	nowSound chan *sound
@@ -18,10 +20,12 @@ type Player struct {
 	cancel   context.CancelFunc
 	ticker   *time.Ticker
 	stop     chan struct{}
+	status   int
 }
 
 func InitPlayer() *Player {
 	music.ReloadSoundFiles()
+	InitScore()
 	ctx, cancel := context.WithCancel(context.Background())
 	ticker := time.NewTicker(4 * time.Second)
 	return &Player{
@@ -38,17 +42,32 @@ func InitPlayer() *Player {
 func (this_ *Player) RunPlayer() {
 	speaker.Init(this_.sr, this_.sr.N(time.Second/10))
 	speaker.Play(this_.queue)
+	flag := ""
+	fmt.Println("=======================")
+	time.Sleep(2 * time.Second)
+	this_.randPlay()
 	go func() {
+		defer func() {
+			this_.stop <- struct{}{}
+			fmt.Println("stop 播放器")
+		}()
 		for {
 			select {
 			case <-this_.ctx.Done():
-				fmt.Println("stop 播放器")
-				this_.stop <- struct{}{}
 				return
 			case s := <-this_.nowSound:
-				fmt.Println(s.tag)
+				time.Sleep(3 * time.Second)
+				fmt.Println(s.tag, "正确(v) ?")
+				fmt.Scanf("%s", &flag)
+				if flag == "v" {
+					AddScore(s.id)
+				}
+				if this_.status == statusStop {
+					return
+				}
+				fmt.Println("=======================")
+				time.Sleep(2 * time.Second)
 				s.resetSound()
-			case <-this_.ticker.C:
 				this_.randPlay()
 			}
 		}
@@ -73,5 +92,7 @@ func (this_ *Player) randPlay() {
 func (this_ *Player) Stop() {
 	this_.cancel()
 	this_.ticker.Stop()
+	this_.status = statusStop
 	<-this_.stop
+	saveScore()
 }

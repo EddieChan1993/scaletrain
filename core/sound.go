@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"scaletrain/music"
-	"scaletrain/util"
 )
 
 type sound struct {
@@ -15,17 +14,19 @@ type sound struct {
 	s      beep.StreamSeekCloser
 	format beep.Format
 	tag    string
+	id     int
 }
 
 //newRandSound 随机获取一歌曲文件
 func newRandSound() *sound {
-	musicFsIndex := util.RandInt(len(music.MusicsFs))
-	musicsFsOne := music.MusicsFs[musicFsIndex-1]
+	musicFsIndex := randIndexByScore()
+	musicsFsOne := music.MusicsFs[musicFsIndex]
 	streamer, format, err := mp3.Decode(musicsFsOne.Fs)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return &sound{
+		id:     musicsFsOne.Id,
 		fs:     musicsFsOne.Fs,
 		s:      streamer,
 		format: format,

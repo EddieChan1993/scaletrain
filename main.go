@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	player := core.InitPlayer()
 	player.RunPlayer()
 	sigStop()
