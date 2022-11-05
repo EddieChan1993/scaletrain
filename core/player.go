@@ -69,7 +69,6 @@ func (this_ *Player) RunPlayer() {
 					if flag == "v" {
 						//对，加分
 						AddScore(s.id)
-						flag = ""
 						this_.randPlay()
 					} else {
 						//错了，则重复播放
