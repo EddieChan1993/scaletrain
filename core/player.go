@@ -64,6 +64,7 @@ func (this_ *Player) RunPlayer() {
 					fmt.Println(waitSec, "秒后公布")
 					time.Sleep(2 * time.Second)
 					fmt.Println(s.tag, "正确(v) ?")
+					flag = ""
 					fmt.Scanf("%s\n", &flag)
 					if flag == "v" {
 						//对，加分
