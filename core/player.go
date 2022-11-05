@@ -70,4 +70,5 @@ func (this_ *Player) randPlay() {
 func (this_ *Player) Stop() {
 	this_.cancel()
 	this_.ticker.Stop()
+	<-this_.ctx.Done()
 }
