@@ -96,7 +96,7 @@ func (this_ *Player) RunPlayer() {
 						fmt.Println(s.tag, "反复听", maxRepeatTimes, "遍")
 						this_.repeatPlay(s.id)
 						repeatTimes++
-						LogTotalScale()
+						SubScore(s.id)
 						break
 					}
 				} else {

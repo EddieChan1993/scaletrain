@@ -59,8 +59,12 @@ func AddScore(id int) {
 	sureScale += 1
 }
 
-func LogTotalScale() {
+func SubScore(id int) {
+	if scores[id] > 1 {
+		scores[id] -= 1
+	}
 	totalScale += 1
+	sureScale += 1
 }
 
 //saveScore 存储分数
