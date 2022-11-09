@@ -7,16 +7,18 @@ import (
 	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/speaker"
 	"scaletrain/music"
+	"scaletrain/util"
 	"time"
 )
 
 const statusStop = 1
-const waitSec = 2        //等待时间
+const waitSec = 3        //等待时间
 const maxRepeatTimes = 3 //最大重复次数
 
 type Player struct {
 	queue    *queue
 	nowSound chan *sound
+	barCh    chan struct{}
 	sr       beep.SampleRate
 	ctx      context.Context
 	cancel   context.CancelFunc
@@ -35,6 +37,7 @@ func InitPlayer() *Player {
 	player := &Player{
 		queue:    &queue{},
 		nowSound: make(chan *sound),
+		barCh:    make(chan struct{}),
 		sr:       beep.SampleRate(44100),
 		ctx:      ctx,
 		cancel:   cancel,
@@ -65,7 +68,7 @@ func (this_ *Player) RunPlayer() {
 	speaker.Init(this_.sr, this_.sr.N(time.Second/10))
 	speaker.Play(this_.queue)
 	fmt.Println("===========开始准备", this_.st, "============")
-	time.Sleep(waitSec * time.Second)
+	util.WaitBar(fmt.Sprintf("%d 秒后开始", waitSec), waitSec)
 	this_.randPlay()
 	go func() {
 		defer func() {
@@ -81,8 +84,7 @@ func (this_ *Player) RunPlayer() {
 			case s := <-this_.nowSound:
 				s.resetSound()
 				if repeatTimes == 0 {
-					fmt.Println(waitSec, "秒后公布")
-					time.Sleep(2 * time.Second)
+					util.WaitBar(fmt.Sprintf("%d 秒后公布答案", waitSec), waitSec)
 					fmt.Println(s.tag, "正确(v) ?")
 					flag = ""
 					fmt.Scanf("%s\n", &flag)
