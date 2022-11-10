@@ -12,7 +12,7 @@ import (
 )
 
 const statusStop = 1
-const waitSec = 3        //等待时间
+const waitSec = 2        //等待时间
 const maxRepeatTimes = 3 //最大重复次数
 
 type Player struct {
