@@ -57,6 +57,8 @@ func AddScore(id int) {
 	scores[id] += 1
 	totalScale += 1
 	sureScale += 1
+	percent := (sureScale * 100) / totalScale
+	fmt.Println(fmt.Sprintf("正确率 %d/%d（%d%%)", sureScale, totalScale, percent))
 }
 
 func SubScore(id int) {
