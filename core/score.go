@@ -8,7 +8,6 @@ import (
 	"scaletrain/util"
 )
 
-const scoreFile = util.PathScore + "score_file.json"
 const defaultScore = 1 //默认分数500
 
 type scoreTyp = map[int]int32
@@ -79,17 +78,17 @@ func saveScore() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	util.TruncateWrite(scoreFile, data)
+	util.TruncateWrite(util.ScoreFile, data)
 	fmt.Println("训练样本存储完成")
 }
 
 //reloadScore 加载分数
 func reloadScore() scoreTyp {
-	if !util.IsExtraFile(scoreFile) {
+	if !util.IsExtraFile(util.ScoreFile) {
 		return nil
 	}
 	scores = make(scoreTyp)
-	data := util.ReadFile(scoreFile)
+	data := util.ReadFile(util.ScoreFile)
 	json.Unmarshal(data, &scores)
 	return scores
 }
