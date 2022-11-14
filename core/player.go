@@ -13,7 +13,7 @@ import (
 
 const statusStop = 1
 const waitSec = 2        //等待时间
-const maxRepeatTimes = 3 //最大重复次数
+const maxRepeatTimes = 2 //最大重复次数
 
 type Player struct {
 	queue    *queue
@@ -95,10 +95,10 @@ func (this_ *Player) RunPlayer() {
 						fmt.Println("=======================")
 					} else {
 						//错了，则重复播放
+						SubScore(s.id)
 						fmt.Println(s.tag, "反复听", maxRepeatTimes, "遍")
 						this_.repeatPlay(s.id)
 						repeatTimes++
-						SubScore(s.id)
 						break
 					}
 				} else {

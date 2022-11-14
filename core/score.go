@@ -57,8 +57,7 @@ func AddScore(id int) {
 	scores[id] += 1
 	totalScale += 1
 	sureScale += 1
-	percent := (sureScale * 100) / totalScale
-	fmt.Println(fmt.Sprintf("正确率 %d/%d（%d%%)", sureScale, totalScale, percent))
+	PrintScore()
 }
 
 func SubScore(id int) {
@@ -66,6 +65,12 @@ func SubScore(id int) {
 		scores[id] -= 1
 	}
 	totalScale += 1
+	PrintScore()
+}
+
+func PrintScore() {
+	percent := (sureScale * 100) / totalScale
+	fmt.Println(fmt.Sprintf("正确率 %d/%d（%d%%)", sureScale, totalScale, percent))
 }
 
 //saveScore 存储分数
